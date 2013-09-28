@@ -173,7 +173,7 @@
   }
 
   function loadData(){
-    d3.json('../data/running-hex-total/hex_running_totals.min.json', function(data){
+    d3.json('hex_running_totals.min.json', function(data){
       SYMPH.data = data;
       parseHash();
       // wereOkayToGo();
