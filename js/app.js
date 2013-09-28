@@ -167,9 +167,14 @@
     SYMPH.timer = setInterval( onTickle, 150.03 );
   }
 
+  function showSeleniumReady(){
+    $('body').append('<div id="is-available"></div>');
+  }
+
   function parseHash(){
     var date = window.location.hash.replace('#','');
     handleDate(date)
+    showSeleniumReady()
   }
 
   function loadData(){
