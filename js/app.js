@@ -57,7 +57,7 @@
    SYMPH.svg = d3.select(SYMPH.map.getPanes().overlayPane).append("svg");
    SYMPH.g   = SYMPH.svg.append("g").attr("class", "leaflet-zoom-hide");
 
-    d3.json("../data/join_result/ca_hex_2000_ided_bounded.geojson", function(collection) {
+    d3.json("ca_hex_2000_ided_bounded.geojson", function(collection) {
       var bounds = d3.geo.bounds(collection),
           path   = d3.geo.path().projection(projectVectors);
 
