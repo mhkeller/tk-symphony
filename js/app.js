@@ -4,8 +4,8 @@
 			map: null,
       svg: null,
       g: null,
-			start_lat: 37.774,
-			start_lng: -122.419,
+			start_lat: 37.78285825179077,
+			start_lng: -122.39052772521971,
 			start_zoom : 13,
       data: null,
       timer: null,
@@ -143,13 +143,17 @@
     return hexes;
   }
 
-
-  function onTickle(){
-    if (SYMPH.data[SYMPH.current_date] != undefined){
-      var day_events = SYMPH.data[SYMPH.current_date];
+  function handleDate(date){
+    if (SYMPH.data[date] != undefined){
+      var day_events = SYMPH.data[date];
       var hexes = extractHexesFromDay(day_events);
       flashHexes(hexes);
     }
+
+  }
+
+  function onTickle(){
+    handleDate(SYMPH.current_date)
     incrementDate();
   }
 
@@ -158,16 +162,20 @@
   }
 
   function wereOkayToGo(){
-    console.log('Alright we\'re going we\'re going! Jeez...');
     console.log(document.querySelector('audio').duration)
     document.getElementById('noise').play();
     SYMPH.timer = setInterval( onTickle, 150.03 );
   }
 
+  function parseHash(){
+    var date = window.location.hash.replace('#','');
+    handleDate(date)
+  }
+
   function loadData(){
     d3.json('../data/running-hex-total/hex_running_totals.min.json', function(data){
       SYMPH.data = data;
-      console.log("ready");
+      parseHash();
       // wereOkayToGo();
     })
   }
