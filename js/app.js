@@ -1,12 +1,16 @@
 (function(){
 
-	var SYMPH = {
+	window.SYMPH = {
 			map: null,
+      svg: null,
+      g: null,
 			start_lat: 37.774,
 			start_lng: -122.419,
-			start_zoom : 13
+			start_zoom : 13,
+      data: null,
+      timer: null,
+      current_date: '2005-01-01'
 	}
-
 
   var CONFIG = {
     mark_number: 1,
@@ -14,59 +18,83 @@
     animation_speed: 100
   }
 
+  var starting_time;
   var els = {
   	$map_canvas: $('#map-canvas')
   }
 
-  function drawVectors(vectors){
-    var polygon_base_style = {
-      weight: 1,
-      opacity: 1,
-      fillOpacity: .95,
-      clickable: false
-    };
-
-    var polygon_styles = [
-      {
-        color: "#00ccff",
-        fillOpacity: .45,
-        fillColor: "#00ccff",
-      },
-      {
-        color: "#ffcc00",
-        fillOpacity: .45,
-        fillColor: "#ffcc00",
-      },
-      {
-        color: "#ff00cc",
-        fillOpacity: .45,
-        fillColor: "#ff00cc",
-      },
-    ];
-
-    console.log(vectors)
-
-    // clearVectors();
-    // SYMPH.polygon_layers = [];
-    _.each(vectors, function(vector){
-	    var polygon_layer = new L.GeoJSON(vector, {
-	      style: function(){
-	        return _.extend(polygon_base_style, polygon_styles[0]);
-	      },
-	      onEachFeature: function(featureData, layer1){
-          (function(layer1, properties){
-  	      	layer1.on('click', function(d){
-              console.log('d')
-            })
-
-          })(layer1, featureData.properties)
-	      }
-	    });
-	    SYMPH.map.addLayer(polygon_layer);
-    // AJMINT.polygon_layers.push(polygon_layer);
-    });
-
+  function flashHexes(hex_arr){
+    _.each(hex_arr, function(hex_id){
+      flashHex(hex_id);
+    })
   }
+
+  function flashHex(hex_id){
+    var request_time = new Date().getTime() - starting_time;
+
+    console.log(SYMPH.current_date, request_time)
+    $('#' + hex_id).attr('class',"svg-flash");
+  }
+
+  function removeFlash(hex_id){
+    // _.delay()
+    _.delay(delayRemove, 500, hex_id);
+  }
+  function delayRemove(hex_id){
+    $('#' + hex_id).attr('class',"");
+    
+  }
+
+  function sanitizeHexId(d){
+    return d.properties.HEX_ID.replace('.','');
+  }
+
+  function sanitizeHexIdAutre(d){
+    return d.hex_id.replace('.','')
+  }
+
+  function drawVectors(){
+   SYMPH.svg = d3.select(SYMPH.map.getPanes().overlayPane).append("svg");
+   SYMPH.g   = SYMPH.svg.append("g").attr("class", "leaflet-zoom-hide");
+
+    d3.json("../data/join_result/ca_hex_2000_ided_bounded.geojson", function(collection) {
+      var bounds = d3.geo.bounds(collection),
+          path   = d3.geo.path().projection(projectVectors);
+
+      var feature = SYMPH.g.selectAll("path")
+          .data(collection.features)
+          .enter()
+          .append("path")
+            .attr('id', function(d) { return sanitizeHexId(d); })
+            .on('transitionend', function(d){ removeFlash(sanitizeHexId(d)) } )
+            .on('mouseover', function(d) { flashHex(sanitizeHexId(d)) })
+
+      SYMPH.map.on("viewreset", resetVectors);
+      resetVectors();
+
+      // Reposition the SVG to cover the features.
+      function resetVectors(){
+        var bottomLeft = projectVectors(bounds[0]),
+            topRight   = projectVectors(bounds[1]);
+
+        SYMPH.svg .attr("width", topRight[0] - bottomLeft[0])
+            .attr("height", bottomLeft[1] - topRight[1])
+            .style("margin-left", bottomLeft[0] + "px")
+            .style("margin-top", topRight[1] + "px");
+
+        SYMPH.g   .attr("transform", "translate(" + -bottomLeft[0] + "," + -topRight[1] + ")");
+
+        feature.attr("d", path);
+      }
+
+      // Use Leaflet to implement a D3 geographic projection.
+      function projectVectors(x) {
+        var point = SYMPH.map.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
+        return [point.x, point.y];
+      }
+    })
+  }
+
 
   // This makes it explode using CSS transitions
   // You have to give it the delay otherwise it doesn't know that it's transitioning to anything
@@ -75,7 +103,6 @@
     $('.marker-' + marker_number).addClass('expand-marker');
     CONFIG.mark_number++;
   }
-
 
   var addMarker = function(marker_number){
     console.log('running')
@@ -91,8 +118,6 @@
     _.delay(popMarker, 0, marker_number);
   }
 
-
-
 	function drawBaseMap(){
 		SYMPH.map = L.map('map-canvas').setView([SYMPH.start_lat, SYMPH.start_lng], SYMPH.start_zoom);
 
@@ -103,17 +128,71 @@
 		
 	}
 
+  function incrementDate(){
+    SYMPH.current_date = moment(SYMPH.current_date, 'YYYY-MM-DD');
+    SYMPH.current_date = SYMPH.current_date.hour(24).format('YYYY-MM-DD');
+  }
+
+  function extractHexesFromDay(day_events){
+    var hexes = [];
+    if (day_events != undefined){
+      _.each(day_events, function(day_event){
+        hexes.push(sanitizeHexIdAutre(day_event))
+      })
+    }
+    return hexes;
+  }
+
+
+  function onTickle(){
+    if (SYMPH.data[SYMPH.current_date] != undefined){
+      var day_events = SYMPH.data[SYMPH.current_date];
+      var hexes = extractHexesFromDay(day_events);
+      flashHexes(hexes);
+    }
+    incrementDate();
+  }
+
+  function stopTimer(){
+    clearTimeout(SYMPH.timer);
+  }
+
+  function wereOkayToGo(){
+    console.log('Alright we\'re going we\'re going! Jeez...');
+    console.log(document.querySelector('audio').duration)
+    document.getElementById('noise').play();
+    SYMPH.timer = setInterval( onTickle, 150.03 );
+  }
+
+  function loadData(){
+    d3.json('../data/running-hex-total/hex_running_totals.min.json', function(data){
+      SYMPH.data = data;
+      console.log("ready");
+      // wereOkayToGo();
+    })
+  }
+
 	function startTheShow(){
 		drawBaseMap();
-		drawVectors(vectors);
+		drawVectors();
+    loadData();
 	}
 
 	var n = 0
 	$(document).keyup(function(e) {
 	  if (e.keyCode == 27) { //esc
-	  	addMarker(CONFIG.mark_number)
-	  	CONFIG.mark_number++
+	  	// addMarker(CONFIG.mark_number)
+	  	// CONFIG.mark_number++
+      // clearTimeout(SYMPH.timer);
+      starting_time = new Date().getTime();
+      wereOkayToGo();
 	  } 
+    if (e.keyCode == 17) { //esc
+      clearTimeout(SYMPH.timer);
+      $.each($('audio'), function () {
+          this.stop();
+      });
+    }
 	});
 
 	startTheShow();

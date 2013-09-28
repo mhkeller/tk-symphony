@@ -4,3 +4,26 @@ body, html, #map-canvas{
 	margin: 0;
 	padding: 0;
 }
+path {
+  fill: #0cf;
+  fill-opacity: 0;
+  stroke: #f3f0df;
+  stroke-width: 1.5px;
+  stroke-opacity: .5;
+  transition:  fill .000001s, fill-opacity .000001s;
+  -moz-transition:  fill .000001s, fill-opacity .000001s;
+  -webkit-transition: fill .000001s, fill-opacity .000001s;
+  -o-transition:  fill .000001s, fill-opacity .000001s;
+  /*opacity: 0;*/
+}
+
+/*path:hover {
+  fill: brown;
+  fill-opacity: .7;
+}
+*/.svg-flash{
+  fill: #fff;
+  fill-opacity: .95;
+  stroke-opacity: .1;
+  /*opacity: 1;*/
+}
