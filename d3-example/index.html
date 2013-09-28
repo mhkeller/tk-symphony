@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css" />
+	 <!--[if lte IE 8]>
+	     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css" />
+	 <![endif]-->
+	 <script src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
+	 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+	 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+  <style>
+	  #map {
+	  	position: absolute;
+	  	top: 0;
+	  	right: 0;
+	  	bottom: 0;
+	  	left: 0;
+		}
+
+		path {
+		  fill: #000;
+		  fill-opacity: .2;
+		  stroke: #fff;
+		  stroke-width: 1.5px;
+		}
+
+		path:hover {
+		  fill: brown;
+		  fill-opacity: .7;
+		}
+  </style>
+</head>
+
+<body>
+	<div id="map"></div>
+	<script>
+		var map = new L.Map("map", {
+	      center: [37.774, -122.419],
+	      zoom: 12
+	    })
+	    .addLayer(new L.TileLayer("http://{s}.tile.cloudmade.com/1a1b06b230af4efdbb989ea99e9841af/998/256/{z}/{x}/{y}.png"));
+
+		var svg = d3.select(map.getPanes().overlayPane).append("svg"),
+		    g   = svg.append("g").attr("class", "leaflet-zoom-hide");
+
+		d3.json("../data/ca_hex_2000_ided_hexes.geojson", function(collection) {
+		  var bounds = d3.geo.bounds(collection),
+		      path = d3.geo.path().projection(project);
+
+		  var feature = g.selectAll("path")
+		      .data(collection.features)
+		    	.enter()
+		    	.append("path")
+		    		.attr('id', function(d) {return d.properties.hex_id});
+
+		  map.on("viewreset", reset);
+		  reset();
+
+		  // Reposition the SVG to cover the features.
+		  function reset() {
+		    var bottomLeft = project(bounds[0]),
+		        topRight   = project(bounds[1]);
+
+		    svg .attr("width", topRight[0] - bottomLeft[0])
+		        .attr("height", bottomLeft[1] - topRight[1])
+		        .style("margin-left", bottomLeft[0] + "px")
+		        .style("margin-top", topRight[1] + "px");
+
+		    g   .attr("transform", "translate(" + -bottomLeft[0] + "," + -topRight[1] + ")");
+
+		    feature.attr("d", path);
+		  }
+
+		  // Use Leaflet to implement a D3 geographic projection.
+		  function project(x) {
+		    var point = map.latLngToLayerPoint(new L.LatLng(x[1], x[0]));
+		    return [point.x, point.y];
+		  }
+		});
+	</script>
+
+</body>
+</html>

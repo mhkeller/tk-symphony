@@ -1,0 +1,1 @@
+SELECT string_agg(hex_id, '","') as ids FROM ca_hex_2000_albers, bounder WHERE ST_Intersects(ca_hex_2000_albers.the_geom, bounder.the_geom) = true 
