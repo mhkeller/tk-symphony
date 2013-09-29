@@ -33,7 +33,7 @@
     var request_time = new Date().getTime() - starting_time;
 
     console.log(SYMPH.current_date, request_time)
-    $('#' + hex_id).attr('class',"svg-flash");
+    $('#' + hex_id).attr('class',"hex svg-flash");
   }
 
   function removeFlash(hex_id){
@@ -41,7 +41,7 @@
     _.delay(delayRemove, 50000, hex_id);
   }
   function delayRemove(hex_id){
-    $('#' + hex_id).attr('class',"");
+    $('#' + hex_id).attr('class',"hex");
     
   }
 
@@ -65,6 +65,7 @@
           .data(collection.features)
           .enter()
           .append("path")
+            .attr('class', 'hex')
             .attr('id', function(d) { return sanitizeHexId(d); })
             .on('transitionend', function(d){ removeFlash(sanitizeHexId(d)) } )
             .on('mouseover', function(d) { flashHex(sanitizeHexId(d)) })
@@ -172,6 +173,7 @@
   }
 
   function parseHash(){
+    $('.hex').attr('class','hex')
     var date = window.location.hash.replace('#','');
     handleDate(date)
     showSeleniumReady()
