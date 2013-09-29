@@ -38,7 +38,7 @@
 
   function removeFlash(hex_id){
     // _.delay()
-    _.delay(delayRemove, 500, hex_id);
+    _.delay(delayRemove, 5000, hex_id);
   }
   function delayRemove(hex_id){
     $('#' + hex_id).attr('class',"");
@@ -189,6 +189,9 @@
 		drawBaseMap();
 		drawVectors();
     loadData();
+    $(window).bind('hashchange', function(e) {
+      parseHash();
+    });
 	}
 
 	var n = 0
