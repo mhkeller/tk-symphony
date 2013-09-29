@@ -171,12 +171,17 @@
   function showSeleniumReady(){
     $('body').append('<div id="is-available"></div>');
   }
+  function hideSeleniumReady(){
+    $("#is-available").remove();
+  }
 
   function parseHash(){
-    $('.hex').attr('class','hex')
+    $('.hex').attr('class','hex');
+    hideSeleniumReady();
     var date = window.location.hash.replace('#','');
-    handleDate(date)
-    showSeleniumReady()
+    handleDate(date);
+    $("#date-show").html(date);
+    showSeleniumReady();
   }
 
   function loadData(){
