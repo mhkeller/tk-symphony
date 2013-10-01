@@ -247,7 +247,7 @@
         SYMPH.count_scale = d3.scale.linear()
                       .domain([0, max])
                       .range([0, 1]);
-        wereOkayToGo();
+        // wereOkayToGo();
       })
 
     })
