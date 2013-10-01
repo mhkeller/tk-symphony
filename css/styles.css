@@ -4,9 +4,9 @@ body, html, #map-canvas{
 	margin: 0;
 	padding: 0;
 }
-path {
-  fill: #0cf;
-  fill-opacity: 0;
+path.hex {
+  /*fill: #0cf;*/
+  /*fill-opacity: 0;*/
   stroke: #f3f0df;
   stroke-width: 1.5px;
   stroke-opacity: .5;
@@ -21,8 +21,36 @@ path {
   fill: brown;
   fill-opacity: .7;
 }
-*/.svg-flash{
+*/
+.hex{
+  fill: #0cf;
+}
+.svg-flash.auto-fault{
+  fill: #8DA0CB;
+    fill-opacity: .95;
+  stroke-opacity: .1;
+  stroke-width: 1.5px;
+  stroke-opacity: .5;
+
+}
+.svg-flash.bike-fault{
+  fill: #FC8D62;
+    fill-opacity: .95;
+  stroke-opacity: .1;
+  stroke-width: 1.5px;
+  stroke-opacity: .5;
+
+}
+.svg-flash.none-fault{
   fill: #fff;
+    fill-opacity: .95;
+  stroke-opacity: .1;
+  stroke-width: 1.5px;
+  stroke-opacity: .5;
+
+}
+.svg-flash{
+  /*fill: #fff;*/
   fill-opacity: .95;
   stroke-opacity: .1;
   /*opacity: 1;*/

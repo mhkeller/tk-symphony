@@ -96,14 +96,13 @@ _.sortBy(json, function(d){ return d.time_key });
 json.forEach(function(row){
 	// Not all of them were properly geocoded and so not all have a hex_id
 	var isAGoodHexVal = isAGoodHex(row.hex_id);
-
+	console.log(row)
 	if (isAGoodHexVal){
 		var current_hex_hit_val = incrementHexId(row.hex_id),
 			  time_key            = row.time_key
-			  obj									= createTimeObj(row.hex_id, row['_case']);
+			  obj									= createTimeObj(row.hex_id, row['___case']);
 
 		createTimeArray(time_key);
-
 		times[time_key].push(obj);
 		
 	}

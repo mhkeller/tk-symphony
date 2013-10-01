@@ -9,7 +9,10 @@
 			start_zoom : 13,
       data: null,
       timer: null,
-      current_date: '2005-01-01'
+      current_date: '2005-01-01',
+      data_max_count: null,
+      count_scale: null,
+      lookup: null
 	}
 
   var CONFIG = {
@@ -23,17 +26,42 @@
   	$map_canvas: $('#map-canvas')
   }
 
-  function flashHexes(hex_arr){
-    _.each(hex_arr, function(hex_id){
-      flashHex(hex_id);
+  function flashHexes(hexes_counts_cases){
+    _.each(hexes_counts_cases, function(day_event, hex_id, list){
+      flashHex(day_event);
     })
   }
 
-  function flashHex(hex_id){
+  function mergeFaults(fault){
+    if (fault == 'BICYCLIST'){
+      return '#FC8D62'
+    }else if (fault == 'NO_FAULT' || fault == 'SOLO_ACCIDENT'){
+      return '#fff'
+    }else if (fault == 'AUTO' || fault == 'PARKED_AUTO'){
+      return '#8DA0CB'
+    }else{
+      return '#fff'
+    }
+  }
+
+  function mergeClass(at_fault_hex){
+    if (at_fault_hex == '#8DA0CB'){
+      return 'auto-fault'
+    }else if (at_fault_hex == '#FC8D62'){
+      return 'bike-fault'
+    }else{
+      return 'none-fault'
+    }
+  }
+
+  function flashHex(day_event){
     var request_time = new Date().getTime() - starting_time;
 
-    console.log(SYMPH.current_date, request_time)
-    $('#' + hex_id).attr('class',"hex svg-flash");
+    // console.log(SYMPH.current_date, request_time)
+    var fault = SYMPH.lookup[day_event.case_id].p1;
+    var at_fault_hex   = mergeFaults(fault);
+    var at_fault_class = mergeClass(at_fault_hex);
+    $('#' + day_event.hex).attr('class',"hex svg-flash").attr('class', 'hex svg-flash ' + at_fault_class);
   }
 
   function removeFlash(hex_id){
@@ -53,6 +81,14 @@
     return d.hex_id.replace('.','')
   }
 
+
+  function setOpacities(hexes_counts){
+    _.each(hexes_counts, function(obj, hex_id, list){
+      var count_as_opacity = SYMPH.count_scale(obj.count);
+      $('#' + hex_id).attr('fill-opacity', count_as_opacity).attr('fill-color','#0cf');
+    });
+  }
+
   function drawVectors(){
    SYMPH.svg = d3.select(SYMPH.map.getPanes().overlayPane).append("svg");
    SYMPH.g   = SYMPH.svg.append("g").attr("class", "leaflet-zoom-hide");
@@ -66,6 +102,7 @@
           .enter()
           .append("path")
             .attr('class', 'hex')
+            .attr('fill-opacity', 0)
             .attr('id', function(d) { return sanitizeHexId(d); })
             .on('transitionend', function(d){ removeFlash(sanitizeHexId(d)) } )
             .on('mouseover', function(d) { flashHex(sanitizeHexId(d)) })
@@ -135,25 +172,32 @@
   }
 
   function extractHexesFromDay(day_events){
-    var hexes = [];
+    var hexes_counts = {}
     if (day_events != undefined){
       _.each(day_events, function(day_event){
-        hexes.push(sanitizeHexIdAutre(day_event))
+        var obj = {
+          hex: sanitizeHexIdAutre(day_event),
+          count: day_event.count,
+          case_id: day_event.case_id
+        }
+        hexes_counts[sanitizeHexIdAutre(day_event)] = obj;
       })
     }
-    return hexes;
+    return hexes_counts;
   }
 
   function handleDate(date){
     if (SYMPH.data[date] != undefined){
       var day_events = SYMPH.data[date];
-      var hexes = extractHexesFromDay(day_events);
-      flashHexes(hexes);
+      var hexes_counts_cases = extractHexesFromDay(day_events);
+      flashHexes(hexes_counts_cases);
+      setOpacities(hexes_counts_cases);
     }
 
   }
 
   function onTickle(){
+    $('.hex').attr('class','hex');
     handleDate(SYMPH.current_date)
     incrementDate();
   }
@@ -163,8 +207,8 @@
   }
 
   function wereOkayToGo(){
-    console.log(document.querySelector('audio').duration)
-    document.getElementById('noise').play();
+    // console.log(document.querySelector('audio').duration)
+    // document.getElementById('noise').play();
     SYMPH.timer = setInterval( onTickle, 150.03 );
   }
 
@@ -184,12 +228,30 @@
     showSeleniumReady();
   }
 
+
   function loadData(){
-    d3.json('hex_running_totals.min.json', function(data){
-      SYMPH.data = data;
-      parseHash();
-      // wereOkayToGo();
+    d3.json('case-lookup-table.min.json', function(lookup){
+      SYMPH.lookup = lookup;
+
+      d3.json('hex_running_totals.min.json', function(data){
+        SYMPH.data = data;
+        parseHash();
+        var counts = [];
+        _.each(data, function(arr, key, list){
+          _.each(arr, function(obj){
+            counts.push(obj.count)
+          })
+        })
+        var max = d3.max(counts);
+        SYMPH.data_max_count = max;
+        SYMPH.count_scale = d3.scale.linear()
+                      .domain([0, max])
+                      .range([0, 1]);
+        wereOkayToGo();
+      })
+
     })
+
   }
 
 	function startTheShow(){
@@ -206,9 +268,9 @@
 	  if (e.keyCode == 27) { //esc
 	  	// addMarker(CONFIG.mark_number)
 	  	// CONFIG.mark_number++
-      // clearTimeout(SYMPH.timer);
-      starting_time = new Date().getTime();
-      wereOkayToGo();
+      clearTimeout(SYMPH.timer);
+      // starting_time = new Date().getTime();
+      // wereOkayToGo();
 	  } 
     if (e.keyCode == 17) { //esc
       clearTimeout(SYMPH.timer);
