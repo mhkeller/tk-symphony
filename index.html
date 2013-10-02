@@ -9,6 +9,7 @@
 	<link rel="stylesheet" type="text/css" href="css/styles.css">
 	<link rel="stylesheet" type="text/css" href="css/marker.css">
 	<link rel="stylesheet" href="css/thirdparty/leaflet.css" />
+	<link rel="stylesheet" href="css/chart-styles.css" />
 	<!--[if lte IE 8]>
 	    <link rel="stylesheet" href="css/thirdparty/leaflet.ie.css" />
 	<![endif]-->
@@ -23,8 +24,15 @@
 
 	<div id="map-canvas"></div>
 	<div id="date-show"></div>
+	<div id="chart-show"></div>
+	<ul id="legend">
+		<li><span id="bike" class="color-box"></span> Bikes at fault</li>
+		<li><span id="auto" class="color-box"></span> Cars at fault</li>
+		<li><span id="other" class="color-box"></span> Other</li>
+	</ul>
 <!-- 	<audio id="noise" src="sound/crashes-v1.mp3"></audio>
  -->
+	<script src="js/chart.js"></script>
 	<script src="js/app.js"></script>
 </body>
 </html>

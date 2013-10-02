@@ -42,7 +42,7 @@ path.hex {
 
 }
 .svg-flash.none-fault{
-  fill: #fff;
+  fill: #8df6cc;
     fill-opacity: .95;
   stroke-opacity: .1;
   stroke-width: 1.5px;
@@ -56,11 +56,51 @@ path.hex {
   /*opacity: 1;*/
 }
 #date-show{
-  position: absolute;
-  top: 20px;
-  right: 50px;
-  color: #fff;
-  font-size: 16px;
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light","Helvetica Neue", Helvetica,sans-serif;
-  font-weight: 300;
+position: absolute;
+top: 20px;
+right: 20px;
+color: #FFF;
+font-size: 28px;
+font-family: "HelveticaNeue-Light", "Helvetica Neue Light","Helvetica Neue", Helvetica,sans-serif;
+font-weight: 300;
+background-color: #000;
+padding: 0 10px;
+
 }
+
+#chart-show{
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 350px;
+  height: 200px;
+}
+#legend{
+  list-style: none;
+
+  position: absolute;
+  right: 20px;
+  top: 57px;
+  color: #ccc;
+  font-size: 28px;
+  margin:0;
+  padding: 0;
+}
+
+.color-box{
+  display: inline-block;
+  width: 50px;
+  height: 20px;
+  background-color: #0cf;
+}
+
+#bike{
+  background-color: #FC8D62;
+}
+#auto{
+  background-color: #8DA0CB;
+}
+#other{
+  background-color: #8df6cc;
+}
+

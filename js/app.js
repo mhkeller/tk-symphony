@@ -33,14 +33,12 @@
   }
 
   function mergeFaults(fault){
-    if (fault == 'BICYCLIST'){
+    if (fault == 'BICYCLIST' || fault == 'SOLO_ACCIDENT'){
       return '#FC8D62'
-    }else if (fault == 'NO_FAULT' || fault == 'SOLO_ACCIDENT'){
-      return '#fff'
     }else if (fault == 'AUTO' || fault == 'PARKED_AUTO'){
       return '#8DA0CB'
     }else{
-      return '#fff'
+      return '#8df6cc'
     }
   }
 
@@ -57,8 +55,7 @@
   function flashHex(day_event){
     var request_time = new Date().getTime() - starting_time;
 
-    // console.log(SYMPH.current_date, request_time)
-    var fault = SYMPH.lookup[day_event.case_id].p1;
+    var fault          = SYMPH.lookup[day_event.case_id].p1;
     var at_fault_hex   = mergeFaults(fault);
     var at_fault_class = mergeClass(at_fault_hex);
     $('#' + day_event.hex).attr('class',"hex svg-flash").attr('class', 'hex svg-flash ' + at_fault_class);
@@ -187,6 +184,7 @@
   }
 
   function handleDate(date){
+    showUpTo(format.parse(date))
     if (SYMPH.data[date] != undefined){
       var day_events = SYMPH.data[date];
       var hexes_counts_cases = extractHexesFromDay(day_events);
@@ -200,6 +198,8 @@
     $('.hex').attr('class','hex');
     handleDate(SYMPH.current_date)
     incrementDate();
+    $("#date-show").html(SYMPH.current_date);
+
   }
 
   function stopTimer(){
@@ -228,7 +228,6 @@
     showSeleniumReady();
   }
 
-
   function loadData(){
     d3.json('case-lookup-table.min.json', function(lookup){
       SYMPH.lookup = lookup;
@@ -248,6 +247,8 @@
                       .domain([0, max])
                       .range([0, 1]);
         // wereOkayToGo();
+
+
       })
 
     })
